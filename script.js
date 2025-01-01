@@ -5,21 +5,36 @@ const helpmenu = document.querySelector("#help-menu");
 const listContainer = document.getElementById("list-container");
 
 let animation1 = "1s timer infinite";
-let animation2 = "boardDisappear 2s ease-in-out 1";
-let animation3 = "boardAppear 2s ease-in-out 1";
-let animation4 = "questionDisappear 2s ease-in-out 1";
-let animation5 = "questionAppear 2s ease-in-out 1";
+let animation2 = "boardAppear 2s ease-in-out 1";
+let animation3 = "boardDisappear 2s ease-in-out 1";
+let animation4 = "questionAppear 2s ease-in-out 1";
+let animation5 = "questionDisappear 2s ease-in-out 1";
 
 let isMenuOpen = false;
 let isHelpOpen = false;
+let game = false;
 
 let squares = [];
 let players = [];
-let index = players.length + 1;
-while (players.length < 25) {
-	players.push(`Гравець ${index}`);
-	index++;
-}
+
+let selectedSquare = null;
+
+let timers = 30;
+let timerOfFirstPlayer = timers;
+let timerOfSecondPlayer = timers;
+
+let interval = 1000;
+let firstInterval;
+let secondInterval;
+
+let currentPlayer;
+let whoWon;
+
+let firstPlayerScore = 0;
+let secondPlayerScore = 0;
+
+let firstColor = null;
+let secondColor = null;
 
 let colors = [
 	"#eb9292",
@@ -49,49 +64,17 @@ let colors = [
 	"#ebda92",
 ];
 
+let tempIndex = players.length + 1;
+while (players.length < 25) {
+	players.push(`Гравець ${tempIndex}`);
+	tempIndex++;
+}
+
 players.forEach((player, index) => {
 	if (player) {
-		const card = document.createElement("div");
-		const textInsideCard = document.createElement("div");
-		card.appendChild(textInsideCard);
-		card.className = "player-card";
-		textInsideCard.textContent = player;
-		listContainer.appendChild(card);
-		textInsideCard.className = "player-name";
-		const color = document.createElement("input");
-		color.setAttribute("type", "color");
-		color.setAttribute("value", colors[index]);
-		color.addEventListener("change", function () {
-			colors[index] = color.value;
-			createSquares();
-		});
-		color.className = "color";
-		card.appendChild(color);
+		createCards(player, index);
 	}
 });
-
-let selectedSquare = null;
-
-let firstColor = null;
-let secondColor = null;
-
-let timers = 30;
-document.getElementById("timer-left").innerHTML = formatTime(timers);
-document.getElementById("timer-right").innerHTML = formatTime(timers);
-
-let timerOfFirstPlayer = timers;
-let timerOfSecondPlayer = timers;
-let interval = 1000;
-
-let firstPlayerScore = 0;
-let secondPlayerScore = 0;
-
-let currentPlayer = "firstPlayer";
-let whoWon = "secondPlayer";
-
-let firstInterval;
-let secondInterval;
-let game = false;
 
 class Square {
 	constructor(index, name) {
@@ -115,7 +98,9 @@ class Square {
 
 		if (this.element.classList.contains("highlight")) {
 			this.selectSquare();
-		} else {
+		}
+		//
+		else {
 			squares.forEach((square) => square.element.classList.remove("first"));
 			squares.forEach((square) => square.element.classList.remove("selected"));
 			squares.forEach((square) => square.element.classList.remove("highlight"));
@@ -125,15 +110,13 @@ class Square {
 			document.querySelectorAll(".mark").forEach((mark) => mark.remove());
 			document.querySelector("#name-container-left").innerHTML = players[this.index];
 			document.querySelector("#name-container-right").innerHTML = "";
-			document.getElementById("timer-left").innerHTML = formatTime(timers);
-			document.getElementById("timer-right").innerHTML = formatTime(timers);
-			document.getElementById("timer-left").style.animation = "0s";
-			document.getElementById("timer-right").style.animation = "0s";
-			clearInterval(firstInterval);
-			clearInterval(secondInterval);
+			timersUpdateHTML();
+			clearTimerAnimations();
+			clearIntervals();
 			timerOfFirstPlayer = timers;
 			timerOfSecondPlayer = timers;
 			game = false;
+			currentPlayer = "firstPlayer";
 			whoWon = "secondPlayer";
 		}
 	}
@@ -178,14 +161,8 @@ class Square {
 	}
 
 	startGame(mark) {
-		document.querySelector("#field").style.animation = animation2;
-		document.querySelector("#field").style.top = "-200%";
-
-		setTimeout(() => {
-			document.querySelector("#question").style.top = "50%";
-			document.querySelector("#question").style.animation = animation5;
-			document.querySelector("#question").style.display = "flex";
-		}, interval * 2);
+		fieldHide();
+		questionAppear();
 
 		document.querySelector("#name-container-right").innerHTML = players[this.index];
 		game = true;
@@ -196,9 +173,8 @@ class Square {
 					document.getElementById("timer-left").innerHTML = formatTime(timerOfFirstPlayer);
 					document.getElementById("timer-left").style.animation = animation1;
 				} else {
-					clearInterval(firstInterval);
-					game = false;
 					document.getElementById("timer-left").style.animation = "0s";
+					updateAfterGameEnd();
 					questionHideAndFieldAppear();
 				}
 			}, interval);
@@ -208,55 +184,6 @@ class Square {
 		calculateWinner();
 	}
 }
-
-function calculateWinner() {
-	document.getElementById("timer-left").style.animation = "0s";
-	document.getElementById("timer-right").style.animation = "0s";
-
-	if (firstPlayerScore > secondPlayerScore) {
-		whoWon = "firstPlayer";
-	} else if (secondPlayerScore > firstPlayerScore) {
-		whoWon = "secondPlayer";
-	} else {
-		whoWon = "draw";
-	}
-
-	if (whoWon == "firstPlayer") {
-		secondColor = selectedSquare.element.style.backgroundColor;
-		selectedSquare.element.style.backgroundColor = firstColor;
-		let a = squares.filter((square) => square.color === secondColor);
-		if (firstColor != secondColor) {
-			a.forEach((el) => {
-				el.element.style.backgroundColor = firstColor;
-				el.color = firstColor;
-				el.element.innerHTML = "";
-			});
-		}
-	}
-	if (whoWon == "secondPlayer") {
-		secondColor = selectedSquare.element.style.backgroundColor;
-		selectedSquare.element.style.backgroundColor = secondColor;
-		let a = squares.filter((square) => square.color === firstColor);
-		if (firstColor != secondColor) {
-			a.forEach((el) => {
-				el.element.style.backgroundColor = secondColor;
-				el.color = secondColor;
-				el.element.innerHTML = "";
-			});
-		}
-	}
-}
-
-function createSquares() {
-	document.querySelector("#field").innerHTML = "";
-	squares = [];
-	for (let i = 0; i < 25; i++) {
-		const element = new Square(i, players[i]);
-		squares.push(element);
-	}
-}
-
-createSquares();
 
 settingsbutton.addEventListener("click", () => {
 	if (isMenuOpen) {
@@ -272,10 +199,28 @@ settingsbutton.addEventListener("click", () => {
 	isMenuOpen = !isMenuOpen;
 });
 
+helpbutton.addEventListener("click", () => {
+	if (isHelpOpen) {
+		helpmenu.style.top = "-100dvh";
+	} else {
+		if (isMenuOpen) {
+			menu.style.top = "-100dvh";
+			isMenuOpen = !isMenuOpen;
+		}
+		helpmenu.style.top = "0px";
+	}
+
+	isHelpOpen = !isHelpOpen;
+});
+
 document.getElementById("playersInput").addEventListener("input", () => {
 	let input = document.getElementById("playersInput").value;
 
 	listContainer.innerHTML = "";
+
+	if (input.endsWith(" ")) {
+		input = input.slice(0, -1);
+	}
 
 	if (input.endsWith(",")) {
 		input = input.slice(0, -1);
@@ -293,146 +238,107 @@ document.getElementById("playersInput").addEventListener("input", () => {
 		createSquares();
 		elems.forEach((player, index) => {
 			if (player) {
-				const card = document.createElement("div");
-				const textInsideCard = document.createElement("div");
-				card.appendChild(textInsideCard);
-				card.className = "player-card";
-				textInsideCard.textContent = player;
-				listContainer.appendChild(card);
-				textInsideCard.className = "player-name";
-				const color = document.createElement("input");
-				color.setAttribute("type", "color");
-				color.setAttribute("value", colors[index]);
-				color.addEventListener("change", function () {
-					console.log("bara");
-					colors[index] = color.value;
-					createSquares();
-				});
-				color.className = "color";
-				card.appendChild(color);
+				createCards(player, index);
 			}
 		});
 	}
 });
 
-helpbutton.addEventListener("click", () => {
-	if (isHelpOpen) {
-		helpmenu.style.top = "-100dvh";
-	} else {
-		if (isMenuOpen) {
-			menu.style.top = "-100dvh";
-			isMenuOpen = !isMenuOpen;
-		}
-		helpmenu.style.top = "0px";
-	}
-
-	isHelpOpen = !isHelpOpen;
-});
-
 document.addEventListener("keydown", function (event) {
-	clearInterval(firstInterval);
-	clearInterval(secondInterval);
-	document.getElementById("timer-left").style.animation = "0s";
-	document.getElementById("timer-right").style.animation = "0s";
+	clearIntervals();
+	clearTimerAnimations();
 	if (!game) return;
 
 	if (event.key === " ") {
 		if (currentPlayer === "firstPlayer") {
 			firstPlayerScore++;
-			currentPlayer = "secondPlayer";
-			secondInterval = setInterval(() => {
-				if (timerOfSecondPlayer > 0) {
-					timerOfSecondPlayer--;
-					document.getElementById("timer-right").innerHTML = formatTime(timerOfSecondPlayer);
-					document.getElementById("timer-right").style.animation = animation1;
-				} else {
-					clearInterval(firstInterval);
-					clearInterval(secondInterval);
-					game = false;
-					calculateWinner();
-					firstPlayerScore = 0;
-					secondPlayerScore = 0;
-					timerOfFirstPlayer = timers;
-					timerOfSecondPlayer = timers;
-					questionHideAndFieldAppear();
-				}
-			}, interval);
+			playerSecondUpdateHTML();
 		} else {
 			secondPlayerScore++;
-			currentPlayer = "firstPlayer";
-			firstInterval = setInterval(() => {
-				if (timerOfFirstPlayer > 0) {
-					timerOfFirstPlayer--;
-					document.getElementById("timer-left").innerHTML = formatTime(timerOfFirstPlayer);
-					document.getElementById("timer-left").style.animation = animation1;
-				} else {
-					clearInterval(firstInterval);
-					clearInterval(secondInterval);
-					game = false;
-					calculateWinner();
-					firstPlayerScore = 0;
-					secondPlayerScore = 0;
-					timerOfFirstPlayer = timers;
-					timerOfSecondPlayer = timers;
-					questionHideAndFieldAppear();
-				}
-			}, interval);
-		}
-	} else {
-		if (currentPlayer === "firstPlayer") {
-			firstPlayerScore--;
-			currentPlayer = "secondPlayer";
-			secondInterval = setInterval(() => {
-				if (timerOfSecondPlayer > 0) {
-					timerOfSecondPlayer--;
-					document.getElementById("timer-right").innerHTML = formatTime(timerOfSecondPlayer);
-					document.getElementById("timer-right").style.animation = animation1;
-				} else {
-					clearInterval(firstInterval);
-					clearInterval(secondInterval);
-					game = false;
-					calculateWinner();
-					firstPlayerScore = 0;
-					secondPlayerScore = 0;
-					timerOfFirstPlayer = timers;
-					timerOfSecondPlayer = timers;
-					questionHideAndFieldAppear();
-				}
-			}, interval);
-		} else {
-			secondPlayerScore--;
-			currentPlayer = "firstPlayer";
-			firstInterval = setInterval(() => {
-				if (timerOfFirstPlayer > 0) {
-					timerOfFirstPlayer--;
-					document.getElementById("timer-left").innerHTML = formatTime(timerOfFirstPlayer);
-					document.getElementById("timer-left").style.animation = animation1;
-				} else {
-					clearInterval(firstInterval);
-					clearInterval(secondInterval);
-					game = false;
-					calculateWinner();
-					firstPlayerScore = 0;
-					secondPlayerScore = 0;
-					timerOfFirstPlayer = timers;
-					timerOfSecondPlayer = timers;
-					questionHideAndFieldAppear();
-				}
-			}, interval);
+			playerFirstUpdateHTML();
 		}
 	}
-
-	document.querySelector("#correct-counter-left").innerHTML = firstPlayerScore;
-	document.querySelector("#correct-counter-right").innerHTML = secondPlayerScore;
+	//
+	else {
+		if (currentPlayer === "firstPlayer") {
+			firstPlayerScore--;
+			playerSecondUpdateHTML();
+		} else {
+			secondPlayerScore--;
+			playerFirstUpdateHTML();
+		}
+	}
+	scoreUpdateHTML();
 });
 
 document.getElementById("timeInput").addEventListener("change", function () {
 	timers = Number(document.getElementById("timeInput").value);
 	timerOfFirstPlayer = timers;
 	timerOfSecondPlayer = timers;
-	document.getElementById("timer-left").innerHTML = formatTime(timers);
-	document.getElementById("timer-right").innerHTML = formatTime(timers);
+	timersUpdateHTML();
 });
+
+function calculateWinner() {
+	clearTimerAnimations();
+	if (firstPlayerScore > secondPlayerScore) {
+		whoWon = "firstPlayer";
+	} else if (secondPlayerScore > firstPlayerScore) {
+		whoWon = "secondPlayer";
+	} else {
+		whoWon = "draw";
+	}
+	secondColor = selectedSquare.element.style.backgroundColor;
+	if (whoWon == "firstPlayer") {
+		selectedSquare.element.style.backgroundColor = firstColor;
+		let a = squares.filter((square) => square.color === secondColor);
+		if (firstColor != secondColor) {
+			a.forEach((el) => {
+				el.element.style.backgroundColor = firstColor;
+				el.color = firstColor;
+				el.element.innerHTML = "";
+			});
+		}
+	}
+	if (whoWon == "secondPlayer") {
+		selectedSquare.element.style.backgroundColor = secondColor;
+		let a = squares.filter((square) => square.color === firstColor);
+		if (firstColor != secondColor) {
+			a.forEach((el) => {
+				el.element.style.backgroundColor = secondColor;
+				el.color = secondColor;
+				el.element.innerHTML = "";
+			});
+		}
+	}
+}
+
+function createCards(player, index) {
+	const card = document.createElement("div");
+	const textInsideCard = document.createElement("div");
+	card.appendChild(textInsideCard);
+	card.className = "player-card";
+	textInsideCard.textContent = player;
+	listContainer.appendChild(card);
+	textInsideCard.className = "player-name";
+	const color = document.createElement("input");
+	color.setAttribute("type", "color");
+	color.setAttribute("value", colors[index]);
+	color.addEventListener("change", function () {
+		colors[index] = color.value;
+		createSquares();
+	});
+	color.className = "color";
+	card.appendChild(color);
+}
+
+function createSquares() {
+	document.querySelector("#field").innerHTML = "";
+	squares = [];
+	for (let i = 0; i < 25; i++) {
+		const element = new Square(i, players[i]);
+		squares.push(element);
+	}
+}
 
 function formatTime(seconds) {
 	const minutes = Math.floor(seconds / 60);
@@ -442,16 +348,100 @@ function formatTime(seconds) {
 	return `${formattedMinutes}:${formattedSeconds}`;
 }
 
-function questionHideAndFieldAppear() {
-	console.log("why");
-	document.querySelector("#question").style.top = "200%";
-	document.querySelector("#question").style.animation = animation4;
+function questionAppear() {
 	setTimeout(() => {
-		document.querySelector("#field").style.animation = animation3;
-		document.querySelector("#field").style.top = "50%";
-	}, interval * 1.5);
+		document.querySelector("#question").style.top = "50%";
+		document.querySelector("#question").style.animation = animation4;
+		document.querySelector("#question").style.display = "flex";
+	}, interval * 2);
+}
+
+function questionHide() {
+	document.querySelector("#question").style.top = "200%";
+	document.querySelector("#question").style.animation = animation5;
 
 	setTimeout(() => {
 		document.querySelector("#question").style.display = "none";
 	}, interval * 2);
 }
+
+function fieldAppear() {
+	setTimeout(() => {
+		document.querySelector("#field").style.animation = animation2;
+		document.querySelector("#field").style.top = "50%";
+	}, interval * 1.5);
+}
+
+function fieldHide() {
+	document.querySelector("#field").style.animation = animation3;
+	document.querySelector("#field").style.top = "-200%";
+}
+
+function questionHideAndFieldAppear() {
+	questionHide();
+	fieldAppear();
+}
+
+function timersUpdateHTML() {
+	document.getElementById("timer-left").innerHTML = formatTime(timers);
+	document.getElementById("timer-right").innerHTML = formatTime(timers);
+}
+
+function scoreUpdateHTML() {
+	document.querySelector("#correct-counter-left").innerHTML = firstPlayerScore;
+	document.querySelector("#correct-counter-right").innerHTML = secondPlayerScore;
+}
+
+function clearTimerAnimations() {
+	document.getElementById("timer-left").style.animation = "0s";
+	document.getElementById("timer-right").style.animation = "0s";
+}
+
+function playerFirstUpdateHTML() {
+	currentPlayer = "firstPlayer";
+	firstInterval = setInterval(() => {
+		if (timerOfFirstPlayer > 0) {
+			timerOfFirstPlayer--;
+			document.getElementById("timer-left").innerHTML = formatTime(timerOfFirstPlayer);
+			document.getElementById("timer-left").style.animation = animation1;
+		} else {
+			timeOutSoEndGame();
+		}
+	}, interval);
+}
+
+function playerSecondUpdateHTML() {
+	currentPlayer = "secondPlayer";
+	secondInterval = setInterval(() => {
+		if (timerOfSecondPlayer > 0) {
+			timerOfSecondPlayer--;
+			document.getElementById("timer-right").innerHTML = formatTime(timerOfSecondPlayer);
+			document.getElementById("timer-right").style.animation = animation1;
+		} else {
+			timeOutSoEndGame();
+		}
+	}, interval);
+}
+
+function timeOutSoEndGame() {
+	calculateWinner();
+	updateAfterGameEnd();
+	questionHideAndFieldAppear();
+}
+
+function updateAfterGameEnd() {
+	firstPlayerScore = 0;
+	secondPlayerScore = 0;
+	timerOfFirstPlayer = timers;
+	timerOfSecondPlayer = timers;
+	game = false;
+	clearIntervals();
+}
+
+function clearIntervals() {
+	clearInterval(firstInterval);
+	clearInterval(secondInterval);
+}
+
+createSquares();
+timersUpdateHTML();
