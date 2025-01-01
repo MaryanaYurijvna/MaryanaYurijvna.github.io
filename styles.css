@@ -7,100 +7,14 @@
 	font-family: "Montserrat", sans-serif;
 }
 
+:root {
+	--background-color: #333;
+}
+
 body {
-	background-color: #333;
+	background-color: var(--background-color);
 	height: 100dvh;
 	width: 100dvw;
-}
-
-#field {
-	width: 100px;
-	height: 100px;
-	padding: 12px;
-	display: grid;
-	grid-template-columns: repeat(5, 1fr);
-	grid-template-rows: repeat(5, 1fr);
-	position: absolute;
-	transform: translate(-50%, -50%);
-	top: 50%;
-	left: 50%;
-	overflow: hidden;
-	animation: boardAppear 2s ease-in-out 1;
-}
-
-@keyframes boardDisappear {
-	0% {
-		top: 50%;
-	}
-
-	75% {
-		top: 65%;
-	}
-
-	100% {
-		top: -100%;
-	}
-}
-
-@keyframes boardAppear {
-	0% {
-		top: -100%;
-	}
-
-	50% {
-		top: 52%;
-	}
-
-	100% {
-		top: 50%;
-	}
-}
-
-.square {
-	width: 100%;
-	height: 100%;
-	border: 0.1px solid black;
-	display: inline-block;
-	position: relative;
-	cursor: pointer;
-	transition: 0.3s;
-	justify-content: center;
-	align-items: center;
-	display: flex;
-	text-wrap: wrap;
-}
-
-.square:nth-child(1) {
-	border-top-left-radius: 12px;
-}
-
-.square:nth-child(5) {
-	border-top-right-radius: 12px;
-}
-
-.square:nth-child(21) {
-	border-bottom-left-radius: 12px;
-}
-
-.square:nth-child(25) {
-	border-bottom-right-radius: 12px;
-}
-
-.highlight {
-	border: 2px solid red;
-	filter: opacity(0.8);
-}
-
-.selected {
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-	border: 2px solid red;
-	filter: opacity(0.6);
-}
-
-.first {
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-	border: 2px solid blue;
-	filter: opacity(0.6);
 }
 
 #settings {
@@ -221,24 +135,15 @@ menu {
 	font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
 
+input::placeholder {
+	font-weight: 100;
+	font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+
 #list-container {
-	width: 100%;
 	height: 50%;
-	position: absolute;
-	display: flex;
-}
-
-#help-menu {
-	position: relative;
-	width: 100dvw;
-	height: 100dvh;
-	background-color: #654738;
-	top: -100dvh;
-	transition: 1s;
-}
-
-#list-container {
 	display: grid;
+	position: absolute;
 	grid-template-columns: repeat(5, 1fr);
 	grid-template-rows: repeat(5, 1fr);
 	width: 80%;
@@ -278,11 +183,22 @@ menu {
 	display: flex;
 	overflow: hidden;
 	text-overflow: clip;
+	user-select: text;
 }
 
 .color {
 	margin-right: 10px;
 	float: right;
+	cursor: pointer;
+}
+
+#help-menu {
+	position: relative;
+	width: 100dvw;
+	height: 100dvh;
+	background-color: #654738;
+	top: -100dvh;
+	transition: 1s;
 }
 
 #header {
@@ -307,11 +223,101 @@ menu {
 	font-weight: bold;
 }
 
-li {
+.rule {
 	color: #fff;
 	font-size: 12px;
 	font-weight: bold;
 	margin-top: 10px;
+}
+
+#field {
+	width: 100px;
+	height: 100px;
+	padding: 12px;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	grid-template-rows: repeat(5, 1fr);
+	position: absolute;
+	transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	overflow: hidden;
+	animation: boardAppear 2s ease-in-out 1;
+}
+
+@keyframes boardDisappear {
+	0% {
+		top: 50%;
+	}
+
+	75% {
+		top: 65%;
+	}
+
+	100% {
+		top: -100%;
+	}
+}
+
+@keyframes boardAppear {
+	0% {
+		top: -100%;
+	}
+
+	50% {
+		top: 52%;
+	}
+
+	100% {
+		top: 50%;
+	}
+}
+
+.square {
+	width: 100%;
+	height: 100%;
+	border: 0.1px solid black;
+	display: inline-block;
+	position: relative;
+	cursor: pointer;
+	transition: 0.3s;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	text-wrap: wrap;
+}
+
+.square:nth-child(1) {
+	border-top-left-radius: 12px;
+}
+
+.square:nth-child(5) {
+	border-top-right-radius: 12px;
+}
+
+.square:nth-child(21) {
+	border-bottom-left-radius: 12px;
+}
+
+.square:nth-child(25) {
+	border-bottom-right-radius: 12px;
+}
+
+.highlight {
+	border: 2px solid red;
+	filter: opacity(0.8);
+}
+
+.selected {
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	border: 2px solid red;
+	filter: opacity(0.6);
+}
+
+.first {
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	border: 2px solid blue;
+	filter: opacity(0.6);
 }
 
 .mark {
@@ -340,36 +346,42 @@ li {
 
 #left-stats {
 	animation: leftStats 1.5s ease-in-out 1;
+	left: 4%;
 }
 
 #right-stats {
 	animation: rightStats 1.5s ease-in-out 1;
-	display: flex;
+	right: 4%;
 }
 
 @keyframes leftStats {
 	0% {
 		transform: translate(-250%, -50%);
+		opacity: 0;
 	}
 
 	100% {
 		transform: translate(0%, -50%);
+		opacity: 1;
 	}
 }
 
 @keyframes rightStats {
 	0% {
 		transform: translate(250%, -50%);
+		opacity: 0;
 		display: none;
 	}
 
-	50% {
+	81% {
 		display: none;
+		opacity: 0;
 	}
 
 	100% {
 		transform: translate(0%, -50%);
 		display: flex;
+		opacity: 1;
 	}
 }
 
@@ -398,29 +410,17 @@ li {
 	}
 }
 
-.correct-counter,
-.uncorrect-counter {
+.score-counter {
 	font-size: 2em;
 	color: #fff;
 	text-align: center;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-.correct-counter {
 	background-color: rgba(0, 144, 0, 0.7);
-}
-
-.uncorrect-counter {
-	background-color: rgba(255, 0, 0, 0.7);
-}
-
-#left-stats {
-	left: 4%;
-}
-
-#right-stats {
-	right: 4%;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	flex-direction: column;
 }
 
 @media (min-width: 800px) {
@@ -438,29 +438,15 @@ li {
 		flex-direction: column;
 	}
 
-	.counters {
-		transform: translate(-50%, -50%);
-		top: 70%;
-		position: absolute;
-		width: 80%;
-		justify-self: center;
-		align-self: center;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
-
-	.correct-counter,
-	.uncorrect-counter {
-		padding: 10px;
+	.score-counter {
 		position: relative;
-		left: 50%;
-		width: 100%;
+		top: 70%;
+		flex-direction: column;
+		padding: 10px;
 	}
 
-	.uncorrect-counter {
-		margin-top: 16px;
+	.player-card {
+		max-width: 10dvw;
 	}
 }
 
@@ -489,23 +475,24 @@ li {
 		bottom: 8%;
 	}
 
-	.counters {
-		width: 80%;
-		transform: translate(-50%, -50%);
-		left: 50%;
-		top: 70%;
+	.score-counter {
 		position: absolute;
-		display: flex;
-		flex-direction: row;
+		transform: translate(-50%, -50%);
+		width: 90%;
+		height: 40%;
+		top: 70%;
+		left: 50%;
+		padding: 4px 0px;
 	}
 
-	.correct-counter,
-	.uncorrect-counter {
+	#list-container {
+		grid-template-columns: repeat(3, 1fr);
+		grid-template-rows: repeat(9, 1fr);
 		width: 100%;
-		height: 100%;
-		position: relative;
-		padding: 4px;
-		margin: 0px 12px;
+	}
+
+	.player-card {
+		width: 90%;
 	}
 }
 

@@ -1,8 +1,7 @@
-const settingsbutton = document.querySelector("#settings");
 const menu = document.querySelector("menu");
-const helpbutton = document.getElementById("help");
 const helpmenu = document.querySelector("#help-menu");
 const listContainer = document.getElementById("list-container");
+const input = document.getElementById("timeInput");
 
 let animation1 = "1s timer infinite";
 let animation2 = "boardAppear 2s ease-in-out 1";
@@ -101,23 +100,24 @@ class Square {
 		}
 		//
 		else {
-			squares.forEach((square) => square.element.classList.remove("first"));
-			squares.forEach((square) => square.element.classList.remove("selected"));
-			squares.forEach((square) => square.element.classList.remove("highlight"));
-			this.highlightNearby();
-			this.highlightSelf();
-			firstColor = this.element.style.backgroundColor;
-			document.querySelectorAll(".mark").forEach((mark) => mark.remove());
-			document.querySelector("#name-container-left").innerHTML = players[this.index];
-			document.querySelector("#name-container-right").innerHTML = "";
-			timersUpdateHTML();
-			clearTimerAnimations();
-			clearIntervals();
-			timerOfFirstPlayer = timers;
-			timerOfSecondPlayer = timers;
 			game = false;
 			currentPlayer = "firstPlayer";
 			whoWon = "secondPlayer";
+			timersUpdateHTML();
+			clearTimerAnimations();
+			clearIntervals();
+			document.querySelector("#name-container-left").innerHTML = "";
+			document.querySelector("#name-container-right").innerHTML = "";
+			document.querySelectorAll(".mark").forEach((mark) => mark.remove());
+			squares.forEach((square) => square.element.classList.remove("first"));
+			squares.forEach((square) => square.element.classList.remove("selected"));
+			squares.forEach((square) => square.element.classList.remove("highlight"));
+			timerOfFirstPlayer = timers;
+			timerOfSecondPlayer = timers;
+			this.highlightNearby();
+			this.highlightSelf();
+			firstColor = this.element.style.backgroundColor;
+			document.querySelector("#name-container-left").innerHTML = players[this.index];
 		}
 	}
 
@@ -185,7 +185,7 @@ class Square {
 	}
 }
 
-settingsbutton.addEventListener("click", () => {
+document.querySelector("#settings").addEventListener("click", () => {
 	if (isMenuOpen) {
 		menu.style.top = "-100dvh";
 	} else {
@@ -199,7 +199,7 @@ settingsbutton.addEventListener("click", () => {
 	isMenuOpen = !isMenuOpen;
 });
 
-helpbutton.addEventListener("click", () => {
+document.getElementById("help").addEventListener("click", () => {
 	if (isHelpOpen) {
 		helpmenu.style.top = "-100dvh";
 	} else {
@@ -218,11 +218,10 @@ document.getElementById("playersInput").addEventListener("input", () => {
 
 	listContainer.innerHTML = "";
 
-	if (input.endsWith(" ")) {
+	while (input.endsWith(" ")) {
 		input = input.slice(0, -1);
 	}
-
-	if (input.endsWith(",")) {
+	while (input.endsWith(",")) {
 		input = input.slice(0, -1);
 	}
 
@@ -271,11 +270,13 @@ document.addEventListener("keydown", function (event) {
 	scoreUpdateHTML();
 });
 
-document.getElementById("timeInput").addEventListener("change", function () {
-	timers = Number(document.getElementById("timeInput").value);
-	timerOfFirstPlayer = timers;
-	timerOfSecondPlayer = timers;
-	timersUpdateHTML();
+input.addEventListener("change", function () {
+	if (Number(input.value) >= 1 && Number.isInteger(Number(input.value))) {
+		timers = Number(input.value);
+		timerOfFirstPlayer = timers;
+		timerOfSecondPlayer = timers;
+		timersUpdateHTML();
+	}
 });
 
 function calculateWinner() {
@@ -388,8 +389,8 @@ function timersUpdateHTML() {
 }
 
 function scoreUpdateHTML() {
-	document.querySelector("#correct-counter-left").innerHTML = firstPlayerScore;
-	document.querySelector("#correct-counter-right").innerHTML = secondPlayerScore;
+	document.querySelector("#score-counter-left").innerHTML = firstPlayerScore;
+	document.querySelector("#score-counter-right").innerHTML = secondPlayerScore;
 }
 
 function clearTimerAnimations() {

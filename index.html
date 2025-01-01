@@ -32,17 +32,13 @@
     <div id="left-stats">
         <div class="name-container" id="name-container-left"></div>
         <div class="timer" id="timer-left"></div>
-        <div class="counters" id="counter-left">
-            <div class="correct-counter" id="correct-counter-left">0</div>
-        </div>
+        <div class="score-counter" id="counter-left">0</div>
     </div>
 
     <div id="right-stats">
         <div class="name-container" id="name-container-right"></div>
         <div class="timer" id="timer-right"></div>
-        <div class="counters" id="counter-right">
-            <div class="correct-counter" id="correct-counter-right">0</div>
-        </div>
+        <div class="score-counter" id="counter-right">0</div>
     </div>
 
 
@@ -58,9 +54,9 @@
         <div id="heading">Налаштування</div>
         <div id="settings-container">
             <div id="label1">Мар'яно Юріївно, введіть імена своїх гравців:</div>
-            <input type="text" id="playersInput" placeholder="Введіть гравців через кому (не вводьте дуже довгих імен)"
-                autocomplete="off">
-            <input type="text" id="timeInput" placeholder="Введіть час в секундах" autocomplete="off">
+            <input type="text" id="playersInput"
+                placeholder="Введіть імена гравців через кому (не вводьте дуже довгих імен)" autocomplete="off">
+            <input type="number" id="timeInput" placeholder="Введіть час в секундах" autocomplete="off">
         </div>
         <div id="list-container"></div>
     </menu>
@@ -68,13 +64,18 @@
     <div id="help-menu">
         <div id="header">Правила гри:</div>
         <ul id="rules">
-            <li id="rule1">Спершу потрібно відкрити налаштування та ввести там імена гравців (через кому).</li>
-            <li id="rule2">Після натискання кнопки "Почати" випадковим чином вибирається гравець, який "нападає".</li>
-            <li id="rule3">Він вибирає собі суперника із підсвічених сусідніх клітинок по вертикалі та горизонталі. Щоб
+            <li id="rule1" class="rule">Спершу потрібно відкрити налаштування та ввести там імена гравців (через кому).
+            </li>
+            <li id="rule2" class="rule">Після натискання кнопки "Почати" випадковим чином вибирається гравець, який
+                "нападає".</li>
+            <li id="rule3" class="rule">Він вибирає собі суперника із підсвічених сусідніх клітинок по вертикалі та
+                горизонталі. Щоб
                 вибрати суперника, клікніть по ньому. З'явиться зелена галочка, після натискання на яку почнеться гра.
             </li>
-            <li id="rule4">Під час гри у кожного з гравців будуть таймер і лічильник правильних відповідей.</li>
-            <li id="rule5">Під час натискання пробілу буде зараховуватись правильна відповідь, інакше - неправильна.
+            <li id="rule4" class="rule">Під час гри у кожного з гравців будуть таймер і лічильник правильних відповідей.
+            </li>
+            <li id="rule5" class="rule">Під час натискання пробілу буде зараховуватись правильна відповідь, інакше -
+                неправильна.
             </li>
         </ul>
     </div>
