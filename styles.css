@@ -5,6 +5,7 @@
 	user-select: none;
 	-webkit-tap-highlight-color: transparent;
 	font-family: "Montserrat", sans-serif;
+	font-weight: 1000;
 }
 
 :root {
@@ -64,11 +65,51 @@ body {
 	}
 }
 
+.in-help{
+	margin: 0px 10px;
+}
+
+#wheel-button {
+	z-index: 2;
+	position: absolute;
+	margin: 10px;
+	margin-left: 110px;
+	width: 40px;
+	height: 40px;
+	border: 2px dashed #ffffff47;
+	border-radius: 50%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	transition: 0.3s;
+	cursor: pointer;
+}
+
+#wheel-button:hover {
+	border: 2px solid #ffffff47;
+	#wheel-icon {
+		opacity: 1;
+		transform: scale(1.1) rotateY(180deg);
+	}
+}
+
 #settings-icon,
-#help-icon {
+#help-icon,
+#wheel-icon {
 	color: #fff;
 	opacity: 0.5;
 	transition: 0.3s;
+}
+
+#header-wheel {
+	top: 50px;
+	position: relative;
+	color: #fff;
+	font-size: 24px;
+	text-align: center;
+	font-weight: bold;
+	text-transform: uppercase;
+	text-wrap: wrap;
 }
 
 menu {
@@ -96,6 +137,9 @@ menu {
 	position: relative;
 	width: 100dvw;
 	justify-self: center;
+	text-align: center;
+	transform: translate(-50%);
+	left: 50%;
 	height: 200px;
 	background-color: #00000010;
 }
@@ -108,9 +152,10 @@ menu {
 }
 
 #playersInput {
+	transform: translate(-50%);
+	left: 50%;
 	position: relative;
 	display: flex;
-	justify-self: center;
 	top: 40px;
 	outline: transparent;
 	border-radius: 4px;
@@ -122,9 +167,10 @@ menu {
 }
 
 #timeInput {
+	transform: translate(-50%);
+	left: 50%;
 	position: relative;
 	display: flex;
-	justify-self: center;
 	top: 60px;
 	outline: transparent;
 	border-radius: 4px;
@@ -137,7 +183,8 @@ menu {
 
 input::placeholder {
 	font-weight: 100;
-	font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+	font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+		"Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
 
 #list-container {
@@ -228,6 +275,31 @@ input::placeholder {
 	font-size: 12px;
 	font-weight: bold;
 	margin-top: 10px;
+	display: flex;
+	align-items: center;
+}
+
+.example-mark {
+	width: 4%;
+	aspect-ratio: 1/1;
+	background-color: #0f0;
+	border-radius: 50%;
+	position: relative;
+	transition: 0.3s;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	justify-self: center;
+	align-self: center;
+	margin: 0px 10px;
+}
+
+#wheel-menu {
+	z-index: 1;
+	position: absolute;
+	width: 100dvw;
+	height: 100dvh;
+	background-color: #012342;
+	top: -100dvh;
+	transition: 1s;
 }
 
 #field {
@@ -235,8 +307,7 @@ input::placeholder {
 	height: 100px;
 	padding: 12px;
 	display: grid;
-	grid-template-columns: repeat(5, 1fr);
-	grid-template-rows: repeat(5, 1fr);
+	grid-template: repeat(5, 1fr) / repeat(5, 1fr);
 	position: absolute;
 	transform: translate(-50%, -50%);
 	top: 50%;
@@ -285,22 +356,7 @@ input::placeholder {
 	align-items: center;
 	display: flex;
 	text-wrap: wrap;
-}
-
-.square:nth-child(1) {
-	border-top-left-radius: 12px;
-}
-
-.square:nth-child(5) {
-	border-top-right-radius: 12px;
-}
-
-.square:nth-child(21) {
-	border-bottom-left-radius: 12px;
-}
-
-.square:nth-child(25) {
-	border-bottom-right-radius: 12px;
+	font-size: 18px;
 }
 
 .highlight {
@@ -310,13 +366,13 @@ input::placeholder {
 
 .selected {
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-	border: 2px solid red;
+	border: 4px solid red;
 	filter: opacity(0.6);
 }
 
 .first {
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-	border: 2px solid blue;
+	border: 6px solid blue;
 	filter: opacity(0.6);
 }
 
@@ -327,6 +383,7 @@ input::placeholder {
 	border-radius: 50%;
 	position: absolute;
 	transition: 0.3s;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .mark:hover {
@@ -388,6 +445,7 @@ input::placeholder {
 .name-container {
 	position: relative;
 	text-align: center;
+	font-size: 32px;
 }
 
 .timer {
@@ -539,4 +597,73 @@ input::placeholder {
 	100% {
 		top: 50%;
 	}
+}
+
+.wheel-container {
+	margin-top: 30px;
+	display: inline-block;
+	position: absolute;
+	transform: translateY(-50%);
+	top: 50%;
+	width: 100%;
+}
+
+.arrow {
+	width: 0;
+	height: 0;
+	border-top: 20px solid transparent;
+	border-bottom: 20px solid transparent;
+	border-left: 20px solid transparent;
+	border-right: 30px solid red;
+	position: absolute;
+	top: 50%;
+	transform: translate(-65%, -50%);
+	left: calc(10% + 500px);
+	z-index: 10;
+}
+
+#wheel {
+	border: 5px solid #000;
+	border-radius: 50%;
+	left: 10%;
+	position: relative;
+	color: red;
+}
+
+#spin-button {
+	margin-top: 20px;
+	padding: 10px 20px;
+	font-size: 18px;
+	cursor: pointer;
+	position: absolute;
+	transform: translate(-50%, -50%);
+	top: 40%;
+	left: 65%;
+	border-radius: 12px;
+	outline: none;
+	border: none;
+	transition: 0.3s;
+}
+
+#spin-button:hover {
+	transform: translate(-50%, -50%) scale(1.1);
+}
+
+#result {
+	margin-top: 20px;
+	font-size: 24px;
+	font-weight: bold;
+	width: 20%;
+	height: 100px;
+	border: 1px solid black;
+	border-radius: 12px;
+	position: absolute;
+	transform: translate(-50%, -50%);
+	top: 60%;
+	left: 65%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	color: #f0f0f0;
+	background-color: #01133255;
 }

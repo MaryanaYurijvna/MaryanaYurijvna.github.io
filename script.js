@@ -1,5 +1,6 @@
 const menu = document.querySelector("menu");
 const helpmenu = document.querySelector("#help-menu");
+const wheelmenu = document.querySelector("#wheel-menu");
 const listContainer = document.getElementById("list-container");
 const input = document.getElementById("timeInput");
 
@@ -11,6 +12,7 @@ let animation5 = "questionDisappear 2s ease-in-out 1";
 
 let isMenuOpen = false;
 let isHelpOpen = false;
+let isWheelOpen = false;
 let game = false;
 
 let squares = [];
@@ -21,6 +23,7 @@ let selectedSquare = null;
 let timers = 30;
 let timerOfFirstPlayer = timers;
 let timerOfSecondPlayer = timers;
+let rowSize = 5;
 
 let interval = 1000;
 let firstInterval;
@@ -34,6 +37,9 @@ let secondPlayerScore = 0;
 
 let firstColor = null;
 let secondColor = null;
+
+let firstName = null;
+let secondName = null;
 
 let colors = [
 	"#eb9292",
@@ -104,31 +110,58 @@ class Square {
 			currentPlayer = "firstPlayer";
 			whoWon = "secondPlayer";
 			timersUpdateHTML();
+			scoreUpdateHTML();
 			clearTimerAnimations();
 			clearIntervals();
+			firstName = null;
+			secondName = null;
 			document.querySelector("#name-container-left").innerHTML = "";
 			document.querySelector("#name-container-right").innerHTML = "";
 			document.querySelectorAll(".mark").forEach((mark) => mark.remove());
-			squares.forEach((square) => square.element.classList.remove("first"));
-			squares.forEach((square) => square.element.classList.remove("selected"));
-			squares.forEach((square) => square.element.classList.remove("highlight"));
+			squares.forEach((square) =>
+				square.element.classList.remove("first")
+			);
+			squares.forEach((square) =>
+				square.element.classList.remove("selected")
+			);
+			squares.forEach((square) =>
+				square.element.classList.remove("highlight")
+			);
 			timerOfFirstPlayer = timers;
 			timerOfSecondPlayer = timers;
 			this.highlightNearby();
 			this.highlightSelf();
 			firstColor = this.element.style.backgroundColor;
-			document.querySelector("#name-container-left").innerHTML = players[this.index];
+			firstName = this.name;
+			document.querySelector("#name-container-left").innerHTML =
+				firstName;
 		}
 	}
 
 	highlightNearby() {
-		const rowSize = 5;
 		const top = this.index - rowSize;
 		const bottom = this.index + rowSize;
 		const left = this.index % rowSize !== 0 ? this.index - 1 : null;
 		const right = (this.index + 1) % rowSize !== 0 ? this.index + 1 : null;
+		const topLeft =
+			this.index % rowSize !== 0 ? this.index - rowSize - 1 : null;
+		const topRight =
+			(this.index + 1) % rowSize !== 0 ? this.index - rowSize + 1 : null;
+		const bottomLeft =
+			this.index % rowSize !== 0 ? this.index + rowSize - 1 : null;
+		const bottomRight =
+			(this.index + 1) % rowSize !== 0 ? this.index + rowSize + 1 : null;
 
-		const nearbyIndices = [top, bottom, left, right].filter((i) => i !== null && i >= 0 && i < squares.length);
+		const nearbyIndices = [
+			top,
+			bottom,
+			left,
+			right,
+			topLeft,
+			topRight,
+			bottomLeft,
+			bottomRight,
+		].filter((i) => i !== null && i >= 0 && i < squares.length);
 
 		nearbyIndices.forEach((i) => {
 			squares[i].element.classList.add("highlight");
@@ -147,7 +180,9 @@ class Square {
 
 		this.element.classList.remove("highlight");
 		this.element.classList.add("selected");
-		squares.forEach((square) => square.element.classList.remove("highlight"));
+		squares.forEach((square) =>
+			square.element.classList.remove("highlight")
+		);
 
 		selectedSquare = this;
 
@@ -163,17 +198,20 @@ class Square {
 	startGame(mark) {
 		fieldHide();
 		questionAppear();
-
-		document.querySelector("#name-container-right").innerHTML = players[this.index];
+		secondName = this.name;
+		document.querySelector("#name-container-right").innerHTML = secondName;
 		game = true;
 		setTimeout(() => {
 			firstInterval = setInterval(() => {
 				if (timerOfFirstPlayer > 0) {
 					timerOfFirstPlayer--;
-					document.getElementById("timer-left").innerHTML = formatTime(timerOfFirstPlayer);
-					document.getElementById("timer-left").style.animation = animation1;
+					document.getElementById("timer-left").innerHTML =
+						formatTime(timerOfFirstPlayer);
+					document.getElementById("timer-left").style.animation =
+						animation1;
 				} else {
-					document.getElementById("timer-left").style.animation = "0s";
+					document.getElementById("timer-left").style.animation =
+						"0s";
 					updateAfterGameEnd();
 					questionHideAndFieldAppear();
 				}
@@ -193,6 +231,10 @@ document.querySelector("#settings").addEventListener("click", () => {
 			helpmenu.style.top = "-100dvh";
 			isHelpOpen = !isHelpOpen;
 		}
+		if (isWheelOpen) {
+			wheelmenu.style.top = "-100dvh";
+			isWheelOpen = !isWheelOpen;
+		}
 		menu.style.top = "0px";
 	}
 
@@ -207,10 +249,32 @@ document.getElementById("help").addEventListener("click", () => {
 			menu.style.top = "-100dvh";
 			isMenuOpen = !isMenuOpen;
 		}
+		if (isWheelOpen) {
+			wheelmenu.style.top = "-100dvh";
+			isWheelOpen = !isWheelOpen;
+		}
 		helpmenu.style.top = "0px";
 	}
 
 	isHelpOpen = !isHelpOpen;
+});
+
+document.getElementById("wheel-button").addEventListener("click", () => {
+	if (isWheelOpen) {
+		wheelmenu.style.top = "-100dvh";
+	} else {
+		if (isMenuOpen) {
+			menu.style.top = "-100dvh";
+			isMenuOpen = !isMenuOpen;
+		}
+		if (isHelpOpen) {
+			helpmenu.style.top = "-100dvh";
+			isHelpOpen = !isHelpOpen;
+		}
+		wheelmenu.style.top = "0px";
+	}
+
+	isWheelOpen = !isWheelOpen;
 });
 
 document.getElementById("playersInput").addEventListener("input", () => {
@@ -291,9 +355,11 @@ function calculateWinner() {
 	secondColor = selectedSquare.element.style.backgroundColor;
 	if (whoWon == "firstPlayer") {
 		selectedSquare.element.style.backgroundColor = firstColor;
+		players.splice(players.indexOf(secondName), 1);
 		let a = squares.filter((square) => square.color === secondColor);
 		if (firstColor != secondColor) {
 			a.forEach((el) => {
+				el.name = firstName;
 				el.element.style.backgroundColor = firstColor;
 				el.color = firstColor;
 				el.element.innerHTML = "";
@@ -302,9 +368,11 @@ function calculateWinner() {
 	}
 	if (whoWon == "secondPlayer") {
 		selectedSquare.element.style.backgroundColor = secondColor;
+		players.splice(players.indexOf(firstName), 1);
 		let a = squares.filter((square) => square.color === firstColor);
 		if (firstColor != secondColor) {
 			a.forEach((el) => {
+				el.name = secondName;
 				el.element.style.backgroundColor = secondColor;
 				el.color = secondColor;
 				el.element.innerHTML = "";
@@ -335,7 +403,7 @@ function createCards(player, index) {
 function createSquares() {
 	document.querySelector("#field").innerHTML = "";
 	squares = [];
-	for (let i = 0; i < 25; i++) {
+	for (let i = 0; i < rowSize ** 2; i++) {
 		const element = new Square(i, players[i]);
 		squares.push(element);
 	}
@@ -389,8 +457,8 @@ function timersUpdateHTML() {
 }
 
 function scoreUpdateHTML() {
-	document.querySelector("#score-counter-left").innerHTML = firstPlayerScore;
-	document.querySelector("#score-counter-right").innerHTML = secondPlayerScore;
+	document.querySelector("#counter-left").innerHTML = firstPlayerScore;
+	document.querySelector("#counter-right").innerHTML = secondPlayerScore;
 }
 
 function clearTimerAnimations() {
@@ -398,12 +466,24 @@ function clearTimerAnimations() {
 	document.getElementById("timer-right").style.animation = "0s";
 }
 
+function setGridSize() {
+	document.querySelector(
+		"#field"
+	).style.gridTemplate = `repeat(${rowSize}, 1fr) / repeat(${rowSize}, 1fr)`;
+	squares[0].element.style.borderTopLeftRadius = "12px";
+	squares[rowSize - 1].element.style.borderTopRightRadius = "12px";
+	squares[rowSize ** 2 - rowSize].element.style.borderBottomLeftRadius =
+		"12px";
+	squares[rowSize ** 2 - 1].element.style.borderBottomRightRadius = "12px";
+}
+
 function playerFirstUpdateHTML() {
 	currentPlayer = "firstPlayer";
 	firstInterval = setInterval(() => {
 		if (timerOfFirstPlayer > 0) {
 			timerOfFirstPlayer--;
-			document.getElementById("timer-left").innerHTML = formatTime(timerOfFirstPlayer);
+			document.getElementById("timer-left").innerHTML =
+				formatTime(timerOfFirstPlayer);
 			document.getElementById("timer-left").style.animation = animation1;
 		} else {
 			timeOutSoEndGame();
@@ -416,7 +496,8 @@ function playerSecondUpdateHTML() {
 	secondInterval = setInterval(() => {
 		if (timerOfSecondPlayer > 0) {
 			timerOfSecondPlayer--;
-			document.getElementById("timer-right").innerHTML = formatTime(timerOfSecondPlayer);
+			document.getElementById("timer-right").innerHTML =
+				formatTime(timerOfSecondPlayer);
 			document.getElementById("timer-right").style.animation = animation1;
 		} else {
 			timeOutSoEndGame();
@@ -446,3 +527,102 @@ function clearIntervals() {
 
 createSquares();
 timersUpdateHTML();
+setGridSize();
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const spinButton = document.getElementById("spin-button");
+const resultDiv = document.getElementById("result");
+
+const sections = [...players];
+const sectionColors = [
+	"#a46666",
+	"#66a478",
+	"#8a66a4",
+	"#a49b66",
+	"#669ca4",
+	"#a4668b",
+	"#79a466",
+	"#6668a4",
+	"#a47766",
+	"#66a488",
+	"#9a66a4",
+	"#9da466",
+	"#668ca4",
+	"#a4667a",
+	"#68a466",
+	"#7666a4",
+	"#a48866",
+	"#66a499",
+	"#a4669e",
+	"#8da466",
+	"#667ba4",
+	"#a4666a",
+	"#66a475",
+	"#8666a4",
+	"#a49966",
+];
+
+const wheelRadius = canvas.width / 2;
+let currentAngle = 0;
+let spinVelocity = 0;
+let spinning = false;
+
+function drawWheel() {
+	const arcSize = (2 * Math.PI) / sections.length;
+
+	for (let i = 0; i < sections.length; i++) {
+		ctx.beginPath();
+		ctx.fillStyle = sectionColors[i % sectionColors.length];
+		ctx.moveTo(wheelRadius, wheelRadius);
+		ctx.arc(
+			wheelRadius,
+			wheelRadius,
+			wheelRadius,
+			currentAngle + i * arcSize,
+			currentAngle + (i + 1) * arcSize
+		);
+		ctx.fill();
+		ctx.save();
+
+		ctx.translate(wheelRadius, wheelRadius);
+		ctx.rotate(currentAngle + i * arcSize + arcSize / 2);
+		ctx.fillStyle = "#fff";
+		ctx.font = "16px Montserrat, Arial";
+		ctx.fillText(sections[i], wheelRadius / 2, 10);
+		ctx.restore();
+	}
+}
+
+function spinWheel() {
+	if (spinning) return;
+	spinning = true;
+
+	spinVelocity = 0.4 + 0.3;
+	const deceleration = 0.005;
+
+	const spinInterval = setInterval(() => {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		currentAngle += spinVelocity;
+		drawWheel();
+
+		spinVelocity -= deceleration;
+		if (spinVelocity <= 0) {
+			clearInterval(spinInterval);
+			spinning = false;
+			showResult();
+		}
+	}, 16);
+}
+
+function showResult() {
+	const arcSize = (2 * Math.PI) / sections.length;
+	const index =
+		Math.floor((2 * Math.PI - (currentAngle % (2 * Math.PI))) / arcSize) %
+		sections.length;
+	resultDiv.textContent = `Грає: ${sections[index]}`;
+}
+
+drawWheel();
+
+spinButton.addEventListener("click", spinWheel);
