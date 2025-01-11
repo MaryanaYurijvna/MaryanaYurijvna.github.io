@@ -2,7 +2,7 @@ const menu = document.querySelector("menu");
 const helpmenu = document.querySelector("#help-menu");
 const wheelmenu = document.querySelector("#wheel-menu");
 const listContainer = document.getElementById("list-container");
-const input = document.getElementById("timeInput");
+const timeInput = document.getElementById("timeInput");
 
 let animation1 = "1s timer infinite";
 let animation2 = "boardAppear 2s ease-in-out 1";
@@ -23,7 +23,9 @@ let selectedSquare = null;
 let timers = 30;
 let timerOfFirstPlayer = timers;
 let timerOfSecondPlayer = timers;
-let rowSize = 5;
+
+let rowSize = 4;
+let pointsPerWrongAnswer = 0;
 
 let interval = 1000;
 let firstInterval;
@@ -70,7 +72,7 @@ let colors = [
 ];
 
 let tempIndex = players.length + 1;
-while (players.length < 25) {
+while (players.length < rowSize ** 2) {
 	players.push(`Гравець ${tempIndex}`);
 	tempIndex++;
 }
@@ -103,38 +105,13 @@ class Square {
 
 		if (this.element.classList.contains("highlight")) {
 			this.selectSquare();
-		}
-		//
-		else {
-			game = false;
-			currentPlayer = "firstPlayer";
-			whoWon = "secondPlayer";
-			timersUpdateHTML();
-			scoreUpdateHTML();
-			clearTimerAnimations();
-			clearIntervals();
-			firstName = null;
-			secondName = null;
-			document.querySelector("#name-container-left").innerHTML = "";
-			document.querySelector("#name-container-right").innerHTML = "";
-			document.querySelectorAll(".mark").forEach((mark) => mark.remove());
-			squares.forEach((square) =>
-				square.element.classList.remove("first")
-			);
-			squares.forEach((square) =>
-				square.element.classList.remove("selected")
-			);
-			squares.forEach((square) =>
-				square.element.classList.remove("highlight")
-			);
-			timerOfFirstPlayer = timers;
-			timerOfSecondPlayer = timers;
+		} else {
+			endGame();
 			this.highlightNearby();
 			this.highlightSelf();
 			firstColor = this.element.style.backgroundColor;
 			firstName = this.name;
-			document.querySelector("#name-container-left").innerHTML =
-				firstName;
+			document.querySelector("#name-container-left").innerHTML = firstName;
 		}
 	}
 
@@ -143,25 +120,12 @@ class Square {
 		const bottom = this.index + rowSize;
 		const left = this.index % rowSize !== 0 ? this.index - 1 : null;
 		const right = (this.index + 1) % rowSize !== 0 ? this.index + 1 : null;
-		const topLeft =
-			this.index % rowSize !== 0 ? this.index - rowSize - 1 : null;
-		const topRight =
-			(this.index + 1) % rowSize !== 0 ? this.index - rowSize + 1 : null;
-		const bottomLeft =
-			this.index % rowSize !== 0 ? this.index + rowSize - 1 : null;
-		const bottomRight =
-			(this.index + 1) % rowSize !== 0 ? this.index + rowSize + 1 : null;
+		const topLeft = this.index % rowSize !== 0 ? this.index - rowSize - 1 : null;
+		const topRight = (this.index + 1) % rowSize !== 0 ? this.index - rowSize + 1 : null;
+		const bottomLeft = this.index % rowSize !== 0 ? this.index + rowSize - 1 : null;
+		const bottomRight = (this.index + 1) % rowSize !== 0 ? this.index + rowSize + 1 : null;
 
-		const nearbyIndices = [
-			top,
-			bottom,
-			left,
-			right,
-			topLeft,
-			topRight,
-			bottomLeft,
-			bottomRight,
-		].filter((i) => i !== null && i >= 0 && i < squares.length);
+		const nearbyIndices = [top, bottom, left, right, topLeft, topRight, bottomLeft, bottomRight].filter((i) => i !== null && i >= 0 && i < squares.length);
 
 		nearbyIndices.forEach((i) => {
 			squares[i].element.classList.add("highlight");
@@ -180,9 +144,7 @@ class Square {
 
 		this.element.classList.remove("highlight");
 		this.element.classList.add("selected");
-		squares.forEach((square) =>
-			square.element.classList.remove("highlight")
-		);
+		squares.forEach((square) => square.element.classList.remove("highlight"));
 
 		selectedSquare = this;
 
@@ -205,13 +167,10 @@ class Square {
 			firstInterval = setInterval(() => {
 				if (timerOfFirstPlayer > 0) {
 					timerOfFirstPlayer--;
-					document.getElementById("timer-left").innerHTML =
-						formatTime(timerOfFirstPlayer);
-					document.getElementById("timer-left").style.animation =
-						animation1;
+					document.getElementById("timer-left").innerHTML = formatTime(timerOfFirstPlayer);
+					document.getElementById("timer-left").style.animation = animation1;
 				} else {
-					document.getElementById("timer-left").style.animation =
-						"0s";
+					document.getElementById("timer-left").style.animation = "0s";
 					updateAfterGameEnd();
 					questionHideAndFieldAppear();
 				}
@@ -290,21 +249,24 @@ document.getElementById("playersInput").addEventListener("input", () => {
 	}
 
 	const elems = input.split(",").map((player) => player.trim());
-	if (elems.length <= 25) {
+	if (elems.length <= rowSize ** 2) {
 		players = elems;
 		let index = players.length + 1;
 
-		while (players.length < 25) {
+		while (players.length < rowSize ** 2) {
 			players.push(`Гравець ${index}`);
 			index++;
 		}
 		createSquares();
+		setGridSize();
 		elems.forEach((player, index) => {
 			if (player) {
 				createCards(player, index);
 			}
 		});
 	}
+	sections = [...players];
+	drawWheel();
 });
 
 document.addEventListener("keydown", function (event) {
@@ -320,23 +282,21 @@ document.addEventListener("keydown", function (event) {
 			secondPlayerScore++;
 			playerFirstUpdateHTML();
 		}
-	}
-	//
-	else {
+	} else {
 		if (currentPlayer === "firstPlayer") {
-			firstPlayerScore--;
+			firstPlayerScore += pointsPerWrongAnswer;
 			playerSecondUpdateHTML();
 		} else {
-			secondPlayerScore--;
+			secondPlayerScore += pointsPerWrongAnswer;
 			playerFirstUpdateHTML();
 		}
 	}
 	scoreUpdateHTML();
 });
 
-input.addEventListener("change", function () {
-	if (Number(input.value) >= 1 && Number.isInteger(Number(input.value))) {
-		timers = Number(input.value);
+timeInput.addEventListener("change", function () {
+	if (Number(timeInput.value) >= 1 && Number.isInteger(Number(timeInput.value))) {
+		timers = Number(timeInput.value);
 		timerOfFirstPlayer = timers;
 		timerOfSecondPlayer = timers;
 		timersUpdateHTML();
@@ -396,6 +356,7 @@ function createCards(player, index) {
 		colors[index] = color.value;
 		createSquares();
 	});
+
 	color.className = "color";
 	card.appendChild(color);
 }
@@ -467,23 +428,90 @@ function clearTimerAnimations() {
 }
 
 function setGridSize() {
-	document.querySelector(
-		"#field"
-	).style.gridTemplate = `repeat(${rowSize}, 1fr) / repeat(${rowSize}, 1fr)`;
+	document.querySelector("#field").style.gridTemplate = `repeat(${rowSize}, 1fr) / repeat(${rowSize}, 1fr)`;
 	squares[0].element.style.borderTopLeftRadius = "12px";
 	squares[rowSize - 1].element.style.borderTopRightRadius = "12px";
-	squares[rowSize ** 2 - rowSize].element.style.borderBottomLeftRadius =
-		"12px";
+	squares[rowSize ** 2 - rowSize].element.style.borderBottomLeftRadius = "12px";
 	squares[rowSize ** 2 - 1].element.style.borderBottomRightRadius = "12px";
 }
+
+function endGame() {
+	game = false;
+	firstName = null;
+	secondName = null;
+	firstColor = null;
+	secondColor = null;
+	document.querySelector("#name-container-left").innerHTML = "";
+	document.querySelector("#name-container-right").innerHTML = "";
+	document.querySelectorAll(".mark").forEach((mark) => mark.remove());
+	squares.forEach((square) => square.element.classList.remove("first"));
+	squares.forEach((square) => square.element.classList.remove("selected"));
+	squares.forEach((square) => square.element.classList.remove("highlight"));
+	timerOfFirstPlayer = timers;
+	timerOfSecondPlayer = timers;
+	firstPlayerScore = 0;
+	secondPlayerScore = 0;
+	currentPlayer = "firstPlayer";
+	whoWon = "secondPlayer";
+	timersUpdateHTML();
+	scoreUpdateHTML();
+	clearTimerAnimations();
+	clearIntervals();
+	firstInterval = undefined;
+	secondInterval = undefined;
+}
+
+document.getElementById("checkbox1").addEventListener("click", () => {
+	if (rowSize == 5) {
+		rowSize = 4;
+	} else if (rowSize == 4) {
+		rowSize = 5;
+	}
+	let input = document.getElementById("playersInput").value;
+	const elems = input.split(",").map((player) => player.trim());
+	document.querySelectorAll(".player-card").forEach((element) => {
+		element.remove();
+	});
+	if (elems.length <= rowSize ** 2) {
+		players = elems;
+		let index = players.length + 1;
+
+		while (players.length < rowSize ** 2) {
+			players.push(`Гравець ${index}`);
+			index++;
+		}
+		createSquares();
+		setGridSize();
+		elems.forEach((player, index) => {
+			if (player) {
+				createCards(player, index);
+			}
+		});
+	}
+	createSquares();
+	setGridSize();
+	endGame();
+	questionHideAndFieldAppear();
+	sections = [...players];
+	drawWheel();
+});
+
+document.getElementById("checkbox2").addEventListener("click", () => {
+	if (pointsPerWrongAnswer == 0) {
+		pointsPerWrongAnswer = -1;
+	} else if (pointsPerWrongAnswer == -1) {
+		pointsPerWrongAnswer = 0;
+	}
+	endGame();
+	questionHideAndFieldAppear();
+});
 
 function playerFirstUpdateHTML() {
 	currentPlayer = "firstPlayer";
 	firstInterval = setInterval(() => {
 		if (timerOfFirstPlayer > 0) {
 			timerOfFirstPlayer--;
-			document.getElementById("timer-left").innerHTML =
-				formatTime(timerOfFirstPlayer);
+			document.getElementById("timer-left").innerHTML = formatTime(timerOfFirstPlayer);
 			document.getElementById("timer-left").style.animation = animation1;
 		} else {
 			timeOutSoEndGame();
@@ -496,8 +524,7 @@ function playerSecondUpdateHTML() {
 	secondInterval = setInterval(() => {
 		if (timerOfSecondPlayer > 0) {
 			timerOfSecondPlayer--;
-			document.getElementById("timer-right").innerHTML =
-				formatTime(timerOfSecondPlayer);
+			document.getElementById("timer-right").innerHTML = formatTime(timerOfSecondPlayer);
 			document.getElementById("timer-right").style.animation = animation1;
 		} else {
 			timeOutSoEndGame();
@@ -534,7 +561,7 @@ const ctx = canvas.getContext("2d");
 const spinButton = document.getElementById("spin-button");
 const resultDiv = document.getElementById("result");
 
-const sections = [...players];
+let sections = [...players];
 const sectionColors = [
 	"#a46666",
 	"#66a478",
@@ -566,7 +593,7 @@ const sectionColors = [
 const wheelRadius = canvas.width / 2;
 let currentAngle = 0;
 let spinVelocity = 0;
-let spinning = false;
+let isSpinning = false;
 
 function drawWheel() {
 	const arcSize = (2 * Math.PI) / sections.length;
@@ -575,41 +602,32 @@ function drawWheel() {
 		ctx.beginPath();
 		ctx.fillStyle = sectionColors[i % sectionColors.length];
 		ctx.moveTo(wheelRadius, wheelRadius);
-		ctx.arc(
-			wheelRadius,
-			wheelRadius,
-			wheelRadius,
-			currentAngle + i * arcSize,
-			currentAngle + (i + 1) * arcSize
-		);
+		ctx.arc(wheelRadius, wheelRadius, wheelRadius, currentAngle + i * arcSize, currentAngle + (i + 1) * arcSize);
 		ctx.fill();
 		ctx.save();
 
 		ctx.translate(wheelRadius, wheelRadius);
 		ctx.rotate(currentAngle + i * arcSize + arcSize / 2);
 		ctx.fillStyle = "#fff";
-		ctx.font = "16px Montserrat, Arial";
+		ctx.font = "20px Montserrat, Arial";
 		ctx.fillText(sections[i], wheelRadius / 2, 10);
 		ctx.restore();
 	}
 }
 
 function spinWheel() {
-	if (spinning) return;
-	spinning = true;
-
-	spinVelocity = 0.4 + 0.3;
-	const deceleration = 0.005;
-
+	if (isSpinning) return;
+	isSpinning = true;
+	spinVelocity = Math.random() * 0.3 + 0.7;
+	let deceleration = 0.005;
 	const spinInterval = setInterval(() => {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		currentAngle += spinVelocity;
 		drawWheel();
-
 		spinVelocity -= deceleration;
 		if (spinVelocity <= 0) {
 			clearInterval(spinInterval);
-			spinning = false;
+			isSpinning = false;
 			showResult();
 		}
 	}, 16);
@@ -617,9 +635,7 @@ function spinWheel() {
 
 function showResult() {
 	const arcSize = (2 * Math.PI) / sections.length;
-	const index =
-		Math.floor((2 * Math.PI - (currentAngle % (2 * Math.PI))) / arcSize) %
-		sections.length;
+	const index = Math.floor((2 * Math.PI - (currentAngle % (2 * Math.PI))) / arcSize) % sections.length;
 	resultDiv.textContent = `Грає: ${sections[index]}`;
 }
 

@@ -65,7 +65,7 @@ body {
 	}
 }
 
-.in-help{
+.in-help {
 	margin: 0px 10px;
 }
 
@@ -151,40 +151,40 @@ menu {
 	position: relative;
 }
 
-#playersInput {
+#playersInput,
+#timeInput {
 	transform: translate(-50%);
-	left: 50%;
 	position: relative;
 	display: flex;
-	top: 40px;
 	outline: transparent;
 	border-radius: 4px;
 	border: transparent 0px solid;
-	width: 80%;
 	height: 50px;
 	padding: 10px;
 	font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+	transition: 0.3s;
+}
+
+#playersInput {
+	left: 50%;
+	top: 40px;
+	width: 70%;
 }
 
 #timeInput {
-	transform: translate(-50%);
-	left: 50%;
-	position: relative;
-	display: flex;
+	left: 22.5%;
 	top: 60px;
-	outline: transparent;
-	border-radius: 4px;
-	border: transparent 0px solid;
-	width: 80%;
-	height: 50px;
-	padding: 10px;
-	font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+	width: 15%;
+}
+
+#timeInput:focus,
+#playersInput:focus {
+	transform: translate(-50%) scale(1.05);
 }
 
 input::placeholder {
 	font-weight: 100;
-	font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-		"Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+	font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
 
 #list-container {
@@ -666,4 +666,70 @@ input::placeholder {
 	align-items: center;
 	color: #f0f0f0;
 	background-color: #01133255;
+}
+.options-container {
+	display: flex;
+	flex-direction: row;
+	gap: 15px;
+	margin: 10px 20px;
+	margin-left: 35%;
+	position: relative;
+	width: 45%;
+}
+
+.option {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+label {
+	color: #fff;
+	font-weight: 600;
+	font-size: 14px;
+}
+
+input[type="checkbox"] {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	cursor: pointer;
+	outline: none;
+	height: 50px;
+	width: 120px;
+	background-color: #222;
+	transition: 0.3s;
+	position: relative;
+	border-radius: 16px;
+}
+
+input[type="checkbox"]:before {
+	content: attr(data-label-off);
+	position: absolute;
+	font-size: 1em;
+	width: 3.75em;
+	height: 2.9em;
+	background-color: #2d2936;
+	color: #a0a0a0;
+	left: 0px;
+	margin: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: "Poppins", sans-serif;
+	font-weight: 600;
+	letter-spacing: 1px;
+	transition: 0.3s;
+	border-radius: 12px;
+}
+
+input[type="checkbox"]:checked {
+	background: linear-gradient(135deg, #8175fe, #89befe);
+	border-radius: 16px;
+}
+
+input[type="checkbox"]:checked:before {
+	content: attr(data-label-on);
+	color: #89befe;
+	left: 50%;
 }
